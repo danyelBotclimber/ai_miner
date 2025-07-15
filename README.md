@@ -1,4 +1,4 @@
 # AI MINER
 
-- how to run:
+### How to run
 python -m tests.test_nonce_increment

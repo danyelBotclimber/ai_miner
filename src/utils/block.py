@@ -4,6 +4,7 @@ Includes serialization, coinbase transaction creation, and hash utilities.
 """
 import hashlib
 import struct
+import base58
 
 def encode_varint(i):
     """
@@ -43,7 +44,21 @@ def encode_script_num(num):
         result[-1] |= 0x80
     return bytes(result)
 
-def create_coinbase_tx(block_height: int, extra_nonce: int, miner_msg: str = "") -> bytes:
+def address_to_script_pubkey(address: str) -> bytes:
+    """
+    Convert a Base58Check Bitcoin address to a P2PKH scriptPubKey.
+    Args:
+        address (str): Base58Check Bitcoin address.
+    Returns:
+        bytes: ScriptPubKey for P2PKH.
+    """
+    decoded = base58.b58decode_check(address)
+    pubkey_hash = decoded[1:]  # remove version byte (first byte)
+    if len(pubkey_hash) != 20:
+        raise ValueError("Invalid public key hash length")
+    return b'\x76\xa9\x14' + pubkey_hash + b'\x88\xac'
+
+def create_coinbase_tx(block_height: int, extra_nonce: int, miner_msg: str = "", address: str = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa") -> bytes:
     """
     Create a serialized coinbase transaction for a new block.
     Args:
@@ -66,7 +81,7 @@ def create_coinbase_tx(block_height: int, extra_nonce: int, miner_msg: str = "")
     tx_in = prev_out_hash + prev_out_index + script_sig_len + script_sig + sequence
     tx_out_count = b'\x01'
     value = struct.pack("<Q", 50 * 100_000_000)
-    script_pubkey = bytes.fromhex("76a91488ac")
+    script_pubkey = address_to_script_pubkey(address) # not valid wallet address check P2PKH (Pay-to-PubKey-Hash) 
     script_pubkey_len = encode_varint(len(script_pubkey))
     tx_out = value + script_pubkey_len + script_pubkey
     lock_time = b'\x00\x00\x00\x00'
