@@ -1,6 +1,4 @@
-import sys, os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
-from environments.simple_bitcoin_env import SimpleBitcoinEnv
+from src.environments.simple_bitcoin_env import SimpleBitcoinEnv
 import numpy as np
 
 NUM_BLOCKS_TO_FIND = 3  # Set how many valid blocks to find before stopping
